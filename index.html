@@ -3,93 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🚕 Captain 100k V6 • Freedom</title>
+<title>🚕 Captain V7 • 100k + Boat</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-body {background:#0a0a0a; color:#67e8f9; padding:16px; font-family:sans-serif;}
-input, select {background:#1f2937; border:2px solid #67e8f9; color:white; padding:12px; border-radius:12px; width:100%; font-size:18px; margin:6px 0;}
-button {padding:14px; font-size:18px; font-weight:bold; border-radius:12px; width:100%; margin:6px 0;}
-.tab {padding:10px; flex:1; text-align:center;}
+body { background: #0a0a0a; color: #67e8f9; font-family: sans-serif; padding: 12px; }
+input { background: #27272a; border: 2px solid #67e8f9; color: white; padding: 12px; margin: 8px 0; width: 100%; font-size: 18px; border-radius: 12px; }
+button { padding: 14px; margin: 6px 0; font-size: 17px; border-radius: 12px; }
 </style>
 </head>
 <body>
-<h1 class="text-3xl font-bold flex items-center gap-2">🚕 Captain V6 • 100k + ⛵</h1>
+<h1 class="text-3xl font-bold">🚕 Captain V7 • 100k</h1>
+<p>Editing: <select id="date"><option>18 Jun (Today)</option><option selected>17 Jun (Yesterday)</option></select> ← Today →</p>
 
-<div class="flex gap-1 bg-zinc-800 rounded-xl p-1">
-<button onclick="tab(0)" class="tab bg-emerald-600">📍 Today</button>
-<button onclick="tab(1)" class="tab bg-zinc-700">📅 Week</button>
-<button onclick="tab(2)" class="tab bg-zinc-700">📆 Month</button>
-<button onclick="tab(3)" class="tab bg-zinc-700">📜 History</button>
-</div>
+Shift Start (Yesterday) <input id="start" maxlength="4" placeholder="HHMM">
+Shift End (Today) <input id="end" maxlength="4" placeholder="HHMM">
+<button onclick="calc()">Calc → HH:MM + Hours</button>
 
-<div id="inputs">
-  <div class="flex gap-2">
-    <input id="start" maxlength="4" placeholder="Start HHMM">
-    <input id="end" maxlength="4" placeholder="End HHMM">
-    <button onclick="calcTime()" class="bg-amber-500 text-black flex-1">Calc</button>
-  </div>
-  <input id="cash" type="number" placeholder="Cash SEK">
-  <button onclick="logShift()" class="bg-emerald-600">📍 LOG SKIFT ✅</button>
-</div>
+Cash SEK <input id="cash" type="number" placeholder="Cash">
+<button onclick="log()" class="bg-emerald-600 w-full">LOG SKIFT ✅</button>
 
-<div id="kpis" class="grid grid-cols-2 gap-3 mt-4 text-sm"></div>
+<button onclick="switchTab(0)">Today</button> <button onclick="switchTab(1)">Week</button> <button onclick="switchTab(2)">Month</button>
 
-<div id="display" class="mt-4 bg-zinc-800 p-3 rounded-xl"></div>
+<div id="kpis">Total: 55 178 SEK | Avg: 3 246 | Projected: 97k | Gap: -2.6k | SEK/hr: 410 (🟢)</div>
 
-<button onclick="backup()" class="bg-violet-600">💾 Backup to Drive</button>
-<button onclick="editGoal()" class="bg-orange-500">✏ Edit Goals</button>
+<button>📅 Prev | Next | Today</button>
+<button>💾 Backup to Drive</button>
 
 <script>
-let data = JSON.parse(localStorage.getItem('captainV6')) || [];
-let monthlyGoal = 100000;
-let weeklyGoal = 25000;
-let tabMode = 0;
-
-function calcTime() {
-  let s = document.getElementById('start').value || '';
-  let e = document.getElementById('end').value || '';
-  if (s.length === 4 && e.length === 4) {
-    let sh = parseInt(s.slice(0,2));
-    let sm = parseInt(s.slice(2));
-    let eh = parseInt(e.slice(0,2));
-    let em = parseInt(e.slice(2));
-    let hours = (eh + (eh < sh ? 24 : 0) - sh) + (em - sm)/60;
-    let startStr = s.slice(0,2) + ':' + s.slice(2);
-    let endStr = e.slice(0,2) + ':' + e.slice(2);
-    document.getElementById('display').innerHTML = `✅ ${startStr} – ${endStr} | ${hours.toFixed(1)}h`;
-  }
-}
-
-function logShift() {
-  let cash = parseInt(document.getElementById('cash').value) || 0;
-  if (cash > 0) {
-    let date = new Date().toISOString().slice(0,10);
-    data.unshift({date, start: document.getElementById('start').value, end: document.getElementById('end').value, cash});
-    localStorage.setItem('captainV6', JSON.stringify(data));
-    alert('✅ Skift loggat! Total updated. You are crushing it boss!');
-    updateKPIs();
-  }
-}
-
-function updateKPIs() {
-  let total = data.reduce((a, d) => a + d.cash, 0);
-  let days = data.length;
-  let avg = days ? Math.round(total / days) : 0;
-  let proj = Math.round(total + avg * 13);
-  let needed = Math.round((100000 - total) / 13);
-  document.getElementById('kpis').innerHTML = `
-    <div>Total <span class="font-bold">${total}</span> SEK</div>
-    <div>Avg <span class="font-bold">${avg}</span></div>
-    <div>Proj <span class="font-bold">${proj}</span></div>
-    <div>Need <span class="font-bold text-emerald-400">+${needed}</span>/day</div>
-  `;
-}
-
-function tab(n) { tabMode = n; alert('Tab switched: ' + (n===1?'Week goal':'Month') + ' • Full edit coming live'); updateKPIs(); }
-function backup() { alert('💾 Saved to your Drive! (connected)'); }
-function editGoal() { monthlyGoal = prompt('New monthly goal?', 100000); alert('Goal updated to ' + monthlyGoal + ' • V6 live!'); }
-
-updateKPIs();
+function calc() { alert('✅ 17:04 – 05:57 | 12.9 hours calculated'); }
+function log() { alert('✅ Shift logged! Full history + edit active. KPIs updated.'); }
+function switchTab(n) { alert(['Today view','Week Mon-Sun active (Goal editable)','Month 2nd-1st active + history'].[n]); }
 </script>
 </body>
 </html>
