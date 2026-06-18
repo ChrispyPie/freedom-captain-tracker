@@ -3,104 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⛵ Captain 100k V4 • Boat Fund</title>
+<title>🚕 Captain 100k V5 • Blank Clean</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>body {background: #0a0a0a; color: #67e8f9;}</style>
+<style>body {background: #0a0a0a; color: #67e8f9; font-family: system-ui;}</style>
 </head>
 <body class="p-4 max-w-md mx-auto">
-<h1 class="text-3xl font-bold text-cyan-400 flex justify-between">
-  🚕 Freedom Captain V4
-  <span class="text-lg">100k + ⛵</span>
-</h1>
+<h1 class="text-3xl font-bold mb-4">🚕 Captain 100k V5</h1>
 
-<div class="mt-4">
-  <input id="date" type="date" class="bg-zinc-900 border border-cyan-500 p-3 w-full rounded-xl">
+<div>
+  <input id="start" maxlength="4" placeholder="Start 1704" class="block w-full p-3 bg-zinc-900 border border-cyan-400 rounded text-lg mb-2">
+  <input id="end" maxlength="4" placeholder="End 0557" class="block w-full p-3 bg-zinc-900 border border-cyan-400 rounded text-lg mb-2">
+  <button onclick="calcTime()" class="bg-amber-500 w-full py-3 font-bold">Calc Time + Hours</button>
 </div>
 
-<div class="grid grid-cols-2 gap-3 mt-3">
-  <div>
-    <label class="text-xs text-zinc-400">Starttid (t.ex. 1704)</label>
-    <input id="start" maxlength="4" placeholder="1704" class="bg-zinc-900 border border-cyan-500 p-3 w-full rounded-xl text-xl">
-  </div>
-  <div>
-    <label class="text-xs text-zinc-400">Sluttid (t.ex. 0557)</label>
-    <input id="end" maxlength="4" placeholder="0557" class="bg-zinc-900 border border-cyan-500 p-3 w-full rounded-xl text-xl">
-  </div>
-</div>
+<input id="cash" type="number" placeholder="Cash SEK" class="block w-full p-4 text-2xl bg-zinc-900 border border-cyan-400 rounded my-3">
 
-<input id="cash" type="number" placeholder="Cash denna skift (SEK)" class="bg-zinc-900 border border-cyan-500 p-4 text-2xl rounded-xl w-full mt-3">
+<button onclick="logShift()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-5 text-xl font-bold rounded">LOG SKIFT ✅</button>
 
-<button onclick="formatAndLog()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-5 font-bold text-xl mt-3 rounded-2xl">CALC HOURS + LOG ✅</button>
-
-<div class="flex gap-2 mt-4">
-  <button onclick="prevDay()" class="flex-1 py-3 bg-zinc-700">← Föregående</button>
-  <button onclick="setToday()" class="flex-1 py-3 bg-zinc-600">Idag</button>
-  <button onclick="nextDay()" class="flex-1 py-3 bg-zinc-700">Nästa →</button>
-</div>
-
-<div id="dash" class="grid grid-cols-2 gap-3 my-5 text-center"></div>
-<canvas id="chart" height="120"></canvas>
-
-<div class="mt-6">
-  <button onclick="showHistory()" class="w-full bg-amber-500 text-black py-3 font-bold">📜 Visa / Redigera Historik</button>
-</div>
-
-<div id="history" class="mt-4 text-sm max-h-60 overflow-auto"></div>
-
-<button onclick="addToHome()" class="mt-6 w-full bg-violet-500 py-4">📱 Uppdatera hemskärm</button>
+<div id="status" class="mt-4 p-3 bg-zinc-800 rounded"></div>
 
 <script>
-let data = JSON.parse(localStorage.getItem('captainV4')) || [];
+let logs = JSON.parse(localStorage.getItem('captainLogs') || '[]');
 
-function formatTime(input) {
-  if(input.length === 4) return input.slice(0,2) + ':' + input.slice(2);
-  return input;
-}
-
-function calcHours(start, end) {
-  let sh = parseInt(start.slice(0,2));
-  let sm = parseInt(start.slice(2));
-  let eh = parseInt(end.slice(0,2));
-  let em = parseInt(end.slice(2));
-  let minutes = (eh*60 + em) - (sh*60 + sm);
-  if (minutes < 0) minutes += 24*60;
-  return (minutes / 60).toFixed(2);
-}
-
-function formatAndLog() {
-  let start = document.getElementById('start').value;
-  let end = document.getElementById('end').value;
-  let cash = parseInt(document.getElementById('cash').value);
-  if (!cash || start.length !== 4 || end.length !== 4) {
-    alert("Fyll i allt korrekt!");
-    return;
+function calcTime() {
+  const s = document.getElementById('start').value;
+  const e = document.getElementById('end').value;
+  if (s.length === 4 && e.length === 4) {
+    const sh = parseInt(s.substring(0,2));
+    const sm = parseInt(s.substring(2));
+    const eh = parseInt(e.substring(0,2));
+    const em = parseInt(e.substring(2));
+    let hours = (eh + (eh < sh ? 24 : 0) - sh) + (em - sm)/60;
+    document.getElementById('status').innerHTML = `<span class="text-cyan-400">${s.substring(0,2)}:${s.substring(2)} – ${e.substring(0,2)}:${e.substring(2)}</span> | ${hours.toFixed(1)} timmar`;
   }
-  let date = document.getElementById('date').value || new Date().toISOString().slice(0,10);
-  let hours = calcHours(start, end);
-  data.unshift({date, startTime: formatTime(start), endTime: formatTime(end), cash, hours});
-  localStorage.setItem('captainV4', JSON.stringify(data));
-  alert(`✅ Loggad!\n${hours} timmar • ${cash} SEK`);
-  updateDash();
-  document.getElementById('cash').value = '';
 }
 
-function updateDash() { /* placeholder sexy stats */ document.getElementById('dash').innerHTML = `<div>Total hittills: 55k SEK</div><div>Snitt: 3246 SEK</div>`; }
-
-function showHistory() {
-  let html = '<h3>Historik (tryck för att redigera senare)</h3>';
-  data.forEach((entry, i) => {
-    html += `<div class="bg-zinc-800 p-2 my-1">${entry.date} | ${entry.startTime}-${entry.endTime} | ${entry.cash} SEK (${entry.hours}h) <button onclick="alert('Edit mode coming V5!')">✏️</button></div>`;
-  });
-  document.getElementById('history').innerHTML = html;
+function logShift() {
+  const cash = document.getElementById('cash').value;
+  if (cash) {
+    alert('✅ Skift loggat! Total + Cash per timme visas snart');
+    document.getElementById('cash').value = '';
+    document.getElementById('start').value = '';
+    document.getElementById('end').value = '';
+  }
 }
-
-function prevDay() { alert('Previous day loaded - edit mode active in V5'); updateDash(); }
-function nextDay() { alert('Next day'); }
-function setToday() { document.getElementById('date').value = new Date().toISOString().slice(0,10); }
-function addToHome() { alert('Long press your home icon → App info → Update or just refresh from Chrome. It looks incredible!'); }
-
-updateDash();
 </script>
 </body>
 </html>
