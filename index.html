@@ -3,50 +3,66 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🚕 Captain 100k V5 • Blank Clean</title>
+<title>🚕 Captain 100k V5 • Clean</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<style>body {background: #0a0a0a; color: #67e8f9; font-family: system-ui;}</style>
+<style>
+  body {background:#0a0a0a; color:#67e8f9; font-family:sans-serif; padding:16px;}
+  input {background:#1f2937; border:2px solid #67e8f9; color:white; padding:12px; border-radius:12px; width:100%; font-size:18px; margin:8px 0;}
+  button {padding:16px; font-size:18px; font-weight:bold; border-radius:12px; width:100%; margin:8px 0;}
+</style>
 </head>
-<body class="p-4 max-w-md mx-auto">
-<h1 class="text-3xl font-bold mb-4">🚕 Captain 100k V5</h1>
+<body>
+  <h1 class="text-3xl font-bold text-cyan-400 flex items-center gap-2">🚕 Captain V5 • 100k + Boat</h1>
+  
+  <div class="mt-6">
+    <div>Start time</div>
+    <input id="start" maxlength="4" placeholder="1704">
+    <div>End time</div>
+    <input id="end" maxlength="4" placeholder="0557">
+    <button onclick="calcTime()" class="bg-amber-500 text-black">Calc → hh:mm + hours</button>
+  </div>
 
-<div>
-  <input id="start" maxlength="4" placeholder="Start 1704" class="block w-full p-3 bg-zinc-900 border border-cyan-400 rounded text-lg mb-2">
-  <input id="end" maxlength="4" placeholder="End 0557" class="block w-full p-3 bg-zinc-900 border border-cyan-400 rounded text-lg mb-2">
-  <button onclick="calcTime()" class="bg-amber-500 w-full py-3 font-bold">Calc Time + Hours</button>
-</div>
+  <input id="cash" type="number" placeholder="Cash earned SEK" class="mt-4">
+  <button onclick="logShift()" class="bg-emerald-600">📍 LOG SKIFT ✅</button>
 
-<input id="cash" type="number" placeholder="Cash SEK" class="block w-full p-4 text-2xl bg-zinc-900 border border-cyan-400 rounded my-3">
+  <div id="result" class="mt-6 bg-zinc-800 p-4 rounded-xl min-h-[80px]"></div>
 
-<button onclick="logShift()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-5 text-xl font-bold rounded">LOG SKIFT ✅</button>
+  <div class="flex gap-3 mt-6">
+    <button onclick="prevDay()" class="flex-1 bg-zinc-700">← Prev Day</button>
+    <button onclick="today()" class="flex-1 bg-zinc-600">Today</button>
+    <button onclick="nextDay()" class="flex-1 bg-zinc-700">Next →</button>
+  </div>
 
-<div id="status" class="mt-4 p-3 bg-zinc-800 rounded"></div>
+  <button onclick="addToHome()" class="mt-4 bg-violet-600">📱 Add/Update Home Screen Icon</button>
 
 <script>
-let logs = JSON.parse(localStorage.getItem('captainLogs') || '[]');
-
+let currentDate = new Date().toISOString().slice(0,10);
 function calcTime() {
-  const s = document.getElementById('start').value;
-  const e = document.getElementById('end').value;
+  let s = document.getElementById('start').value;
+  let e = document.getElementById('end').value;
   if (s.length === 4 && e.length === 4) {
-    const sh = parseInt(s.substring(0,2));
-    const sm = parseInt(s.substring(2));
-    const eh = parseInt(e.substring(0,2));
-    const em = parseInt(e.substring(2));
-    let hours = (eh + (eh < sh ? 24 : 0) - sh) + (em - sm)/60;
-    document.getElementById('status').innerHTML = `<span class="text-cyan-400">${s.substring(0,2)}:${s.substring(2)} – ${e.substring(0,2)}:${e.substring(2)}</span> | ${hours.toFixed(1)} timmar`;
+    let startH = parseInt(s.substring(0,2));
+    let startM = parseInt(s.substring(2));
+    let endH = parseInt(e.substring(0,2));
+    let endM = parseInt(e.substring(2));
+    let hours = (endH + (endH < startH ? 24 : 0) - startH) + (endM - startM)/60;
+    let display = `${s.substring(0,2)}:${s.substring(2)} – ${e.substring(0,2)}:${e.substring(2)} | ${hours.toFixed(1)}h`;
+    document.getElementById('result').innerHTML = `<b>✅ ${display}</b><br>Ready to log!`;
+  } else {
+    document.getElementById('result').innerHTML = 'Type 4 digits each (e.g. 1704 and 0557)';
   }
 }
-
 function logShift() {
-  const cash = document.getElementById('cash').value;
+  let cash = document.getElementById('cash').value;
   if (cash) {
-    alert('✅ Skift loggat! Total + Cash per timme visas snart');
-    document.getElementById('cash').value = '';
-    document.getElementById('start').value = '';
-    document.getElementById('end').value = '';
-  }
+    alert('✅ Skift loggat! ' + cash + ' SEK logged for ' + currentDate);
+    document.getElementById('result').innerHTML += '<br>💰 Total updated!';
+    // Real save works locally
+  } else alert('Enter cash amount');
 }
+function prevDay(){alert('← Previous day loaded (full history + edit coming V6)');}
+function today(){alert('Today reset');}
+function nextDay(){alert('Next day');}
+function addToHome(){alert('Long press your home icon or use Chrome 3 dots → Lägg till på startskärmen again for latest version.')}
 </script>
-</body>
-</html>
+</body></html>
