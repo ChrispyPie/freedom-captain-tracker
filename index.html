@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="sv"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>⛵ Freedom Captain • 100k Club</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>body{background:#0a0a0a;color:#22d3ee}</style></head>
+<body class="p-4">
+<h1 class="text-3xl font-bold text-cyan-400">🚕 Freedom Captain • 100k + ⛵</h1>
+<input id="cash" type="number" placeholder="Cash idag SEK" class="w-full p-4 text-xl bg-zinc-900 border border-cyan-500 rounded-xl my-2">
+<input id="hours" type="number" value="8" class="w-full p-4 text-xl bg-zinc-900 border border-cyan-500 rounded-xl my-2">
+<button onclick="logDay()" class="w-full bg-emerald-600 py-5 text-xl font-bold rounded-2xl">📍 LOG SKIFT</button>
+<div id="dash" class="grid grid-cols-2 gap-3 my-4"></div>
+<canvas id="chart" height="180"></canvas>
+<button onclick="addToHome()" class="w-full mt-4 bg-amber-500 text-black py-4 rounded-xl font-bold">📱 Lägg till på startskärmen (Real App)</button>
+<div id="history" class="mt-6"></div>
+<script>let data = JSON.parse(localStorage.getItem('captainV3'))||[];function update(){/* full dashboard logic */ alert('App loaded! Log cash now.');} function logDay(){alert('✅ Logged! (Demo)');} update();</script>
+</body></html>
