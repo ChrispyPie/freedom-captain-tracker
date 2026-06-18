@@ -1,16 +1,62 @@
 <!DOCTYPE html>
-<html lang="sv"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>⛵ Freedom Captain • 100k Club</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>body{background:#0a0a0a;color:#22d3ee}</style></head>
-<body class="p-4">
-<h1 class="text-3xl font-bold text-cyan-400">🚕 Freedom Captain • 100k + ⛵</h1>
-<input id="cash" type="number" placeholder="Cash idag SEK" class="w-full p-4 text-xl bg-zinc-900 border border-cyan-500 rounded-xl my-2">
-<input id="hours" type="number" value="8" class="w-full p-4 text-xl bg-zinc-900 border border-cyan-500 rounded-xl my-2">
-<button onclick="logDay()" class="w-full bg-emerald-600 py-5 text-xl font-bold rounded-2xl">📍 LOG SKIFT</button>
-<div id="dash" class="grid grid-cols-2 gap-3 my-4"></div>
-<canvas id="chart" height="180"></canvas>
-<button onclick="addToHome()" class="w-full mt-4 bg-amber-500 text-black py-4 rounded-xl font-bold">📱 Lägg till på startskärmen (Real App)</button>
-<div id="history" class="mt-6"></div>
-<script>let data = JSON.parse(localStorage.getItem('captainV3'))||[];function update(){/* full dashboard logic */ alert('App loaded! Log cash now.');} function logDay(){alert('✅ Logged! (Demo)');} update();</script>
+<html lang="sv"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>⛵ Freedom Captain • 100k Club</title><script src="https://cdn.tailwindcss.com"></script><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><style>body{background:#0a0a0a;color:#22d3ee;font-family:sans-serif}</style></head><body class="p-4 max-w-md mx-auto">
+<h1 class="text-3xl font-bold text-cyan-400 flex items-center gap-2">🚕 Freedom Captain • 100k</h1>
+<div class="grid grid-cols-2 gap-3 my-4">
+  <input id="cash" type="number" placeholder="Cash SEK" class="bg-zinc-900 border border-cyan-500 text-white p-4 text-2xl rounded-xl">
+  <input id="hours" type="number" value="8" class="bg-zinc-900 border border-cyan-500 text-white p-4 text-2xl rounded-xl">
+</div>
+<button onclick="logDay()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-xl py-5 rounded-2xl font-bold">LOG SKIFT ✅</button>
+
+<div id="dash" class="grid grid-cols-2 gap-3 text-center mt-6"></div>
+<canvas id="chart" class="mt-4"></canvas>
+<button onclick="addToHome()" class="mt-6 w-full bg-amber-500 text-black py-4 rounded-xl font-bold">📱 Install as REAL APP</button>
+
+<div id="history" class="mt-6 text-sm"></div>
+
+<script>
+let data = JSON.parse(localStorage.getItem('captainData')) || [];
+const ctx = document.getElementById('chart').getContext('2d');
+let myChart;
+
+function updateDash() {
+  const total = data.reduce((a,b)=>a+b.cash,0);
+  const days = data.length;
+  const avg = days ? Math.round(total/days) : 0;
+  const remaining = 30 - days;
+  const projected = Math.round(total + avg * remaining);
+  const gap = projected - 100000;
+
+  document.getElementById('dash').innerHTML = `
+    <div class="bg-zinc-800 p-3 rounded-xl"><div class="text-cyan-400">TOTAL</div><div class="text-3xl font-bold">${total.toLocaleString()}</div></div>
+    <div class="bg-zinc-800 p-3 rounded-xl"><div class="text-cyan-400">SNITT</div><div class="text-3xl font-bold">${avg}</div></div>
+    <div class="bg-zinc-800 p-3 rounded-xl col-span-2"><div class="text-emerald-400">PROJEKTERAD: ${projected.toLocaleString()} SEK • Gap: <span class="${gap>=0?'text-lime-400':'text-orange-400'}">${gap>=0?'+' : ''}${gap}</span></div></div>
+  `;
+
+  // Chart
+  if (myChart) myChart.destroy();
+  myChart = new Chart(ctx, {type:'bar', data:{labels:data.slice(0,7).map(d=>d.date? d.date.slice(5):''), datasets:[{label:'Cash', data:data.slice(0,7).map(d=>d.cash), backgroundColor:'#67e8f9'}]}, options:{scales:{y:{grid:{color:'#666'}}}}});
+
+  let html = '<b>Senaste:</b><br>';
+  data.forEach((d,i) => html += `${d.date} • ${d.cash} (${d.hours}h) <button onclick="deleteDay(${i})">🗑</button><br>`);
+  document.getElementById('history').innerHTML = html;
+}
+
+function logDay() {
+  const cash = parseInt(document.getElementById('cash').value);
+  const hours = parseFloat(document.getElementById('hours').value) || 8;
+  if (!cash) return alert('Skriv in cash');
+  const date = new Date().toISOString().slice(0,10);
+  data.unshift({date, cash, hours});
+  localStorage.setItem('captainData', JSON.stringify(data));
+  document.getElementById('cash').value = '';
+  updateDash();
+  alert('✅ Skift inloggat! Du är på väg mot 100k och båten!');
+}
+
+function deleteDay(i) { if(confirm('Ta bort?')) { data.splice(i,1); localStorage.setItem('captainData', JSON.stringify(data)); updateDash(); } }
+
+function addToHome() { alert('Tryck på ⋮ (3 prickar) uppe till höger i Chrome → "Lägg till på startskärmen" → Lägg till. Nu har du en riktig app!'); }
+
+updateDash();
+</script>
 </body></html>
